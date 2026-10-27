@@ -12,10 +12,24 @@ int main(int argc, char **argv) {
 }
 
 void ish_loop(void) {
-    char *line = ish_read_line();
-    printf("You entered: %s\n", line);
-    free (line);
-    return;
+    // char *line = ish_read_line();
+    // printf("You entered: %s\n", line);
+    // free (line);
+    // return;
+
+    int state = 1;
+    do {
+        printf("> ");
+        char *line = ish_read_line();
+        if (line == NULL) {
+            state = 0;
+        } else {
+            printf("You entered: %s\n", line);
+            free(line);    
+        }
+        
+    } while (state != 0);
+    
 }
 
 char *ish_read_line(void) {
