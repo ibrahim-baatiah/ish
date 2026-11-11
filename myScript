@@ -1,3 +1,6 @@
-ls -l
+pwd
+ls
+cd /tmp
+pwd
 date
 echo All is done!!!

@@ -5,8 +5,8 @@
 #include <sys/wait.h>
 #include <errno.h>
 
-void ish_loop(void);
-char *ish_read_line(void);
+void ish_loop(FILE *stream, int interactive);
+char *ish_read_line(FILE *stream);
 char **ish_split_line(char *line);
 int ish_launch(char **args);
 int ish_cd(char **args);
@@ -15,17 +15,25 @@ int ish_help(char **args);
 int ish_execute(char **args);
 
 int main(int argc, char **argv) {
-
-    ish_loop();
-
+    int interactive = 1;
+    if (argc > 1) {
+        // First arg is the name of the script file
+        if (freopen(argv[1], "r", stdin) == NULL) {
+            fprintf(stderr, "Can't read script from file %s\n", argv[1]);
+            fprintf(stderr, "Exiting\n");
+            exit(1);
+        }
+        interactive = 0;
+    }
+    ish_loop(stdin, interactive);
     return EXIT_SUCCESS;
 }
 
-void ish_loop(void) {
+void ish_loop(FILE *stream, int interactive) {
     int state = 1;
     do {
-        printf("> ");
-        char *line = ish_read_line();
+        if (interactive) printf("> ");
+        char *line = ish_read_line(stream);
         if (line == NULL) {
             state = 0;
         } else {
@@ -41,7 +49,7 @@ void ish_loop(void) {
     
 }
 
-char *ish_read_line(void) {
+char *ish_read_line(FILE *stream) {
     size_t capacity = 16;
     size_t length = 0;
 
@@ -51,7 +59,7 @@ char *ish_read_line(void) {
     }
 
     int ch; // chars in C are simply numbers, including "EOF" & "\n". Therefore we can represent char with an int data type.
-    while ((ch = getchar()) != EOF && ch != '\n') // Use single quotes '\n' not "\n". Single quotes is one char (a number), double quotes is a string (a pointer to memory), so comparing ch with "\n" won't work.
+    while ((ch = fgetc(stream)) != EOF && ch != '\n') // Use single quotes '\n' not "\n". Single quotes is one char (a number), double quotes is a string (a pointer to memory), so comparing ch with "\n" won't work.
     // // getchar() reads one char from the keyboard (stdin), not from a string. It waits until you press Enter, then gives the chars one by one.
     {
         if (length + 1 >= capacity) { // length + 1 because C marks where the string ends with "\0", so we need to keep a spot to add it ourselevs later.
