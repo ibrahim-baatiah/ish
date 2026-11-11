@@ -13,6 +13,7 @@ int ish_cd(char **args);
 int ish_exit(char **args);
 int ish_help(char **args);
 int ish_execute(char **args);
+int handle_redirect(char **args);
 
 int main(int argc, char **argv) {
     int interactive = 1;
@@ -122,6 +123,10 @@ int ish_launch(char **args) {
         fprintf(stderr, "Fork failed\n");
         exit(1);
     } else if (rc == 0) { // This is the child
+        if (handle_redirect(args) == -1) {
+            fprintf(stderr, "Couldn't redirect\n");
+            exit(1);
+        }
         if (execvp(args[0], args) == -1) {
             perror("ish");
         }
@@ -160,4 +165,26 @@ int ish_execute(char **args) {
     else if (strcmp(args[0], "help") == 0) return ish_help(args);
     else ish_launch(args);
     return 1;
+}
+
+int handle_redirect(char **args) {
+    for (int i = 0; args[i] != NULL; i++) {
+        if (strcmp(args[i], ">") == 0) {
+            if (args[i+1] == NULL) {
+                fprintf(stderr, "ish: expected filename after >\n");
+                return -1;
+            }
+            if (freopen(args[i+1], "w", stdout) == NULL) return -1;
+            // Terminate after >
+            args[i] = NULL;
+        } else if (strcmp(args[i], "<") == 0) {
+            if (args[i+1] == NULL) {
+                fprintf(stderr, "ish: expected filename after <\n");
+                return -1;
+            }
+            if (freopen(args[i+1], "r", stdin) == NULL) return -1;
+            args[i] = NULL;
+        }
+    }
+    return 0;
 }
