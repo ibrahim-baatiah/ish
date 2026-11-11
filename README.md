@@ -37,6 +37,17 @@ Run a script:
 ./ish myScript
 ```
 
+Or make the script self-executing with a shebang pointing at `ish`, then run it directly:
+```sh
+#!/path/to/ish
+pwd
+ls
+```
+```sh
+chmod +x myScript
+./myScript
+```
+
 ## Why
 
 This project follows the classic ["Write a Shell in C"](https://brennan.io/2015/01/16/write-a-shell-in-c/) tutorial as a reference, implemented step-by-step to actually understand `fork`/`exec`, process control, and parsing — not just copy the tutorial's code.
