@@ -1,8 +1,10 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 void ish_loop(void);
 char *ish_read_line(void);
+char **ish_split_line(char *line);
 
 int main(int argc, char **argv) {
 
@@ -12,11 +14,6 @@ int main(int argc, char **argv) {
 }
 
 void ish_loop(void) {
-    // char *line = ish_read_line();
-    // printf("You entered: %s\n", line);
-    // free (line);
-    // return;
-
     int state = 1;
     do {
         printf("> ");
@@ -24,8 +21,14 @@ void ish_loop(void) {
         if (line == NULL) {
             state = 0;
         } else {
+            char **args = ish_split_line(line);
             printf("You entered: %s\n", line);
-            free(line);    
+            printf("Let's check each word: \n");
+            for (int i = 0; args[i] != NULL; i++) {
+                printf("Word %d: %s\n",i, args[i]);
+            }
+            free(line);
+            free(args);   
         }
         
     } while (state != 0);
@@ -42,7 +45,8 @@ char *ish_read_line(void) {
     }
 
     int ch; // chars in C are simply numbers, including "EOF" & "\n". Therefore we can represent char with an int data type.
-    while ((ch = getchar()) != EOF && ch != '\n')
+    while ((ch = getchar()) != EOF && ch != '\n') // Use single quotes '\n' not "\n". Single quotes is one char (a number), double quotes is a string (a pointer to memory), so comparing ch with "\n" won't work.
+    // // getchar() reads one char from the keyboard (stdin), not from a string. It waits until you press Enter, then gives the chars one by one.
     {
         if (length + 1 >= capacity) { // length + 1 because C marks where the string ends with "\0", so we need to keep a spot to add it ourselevs later.
             capacity *= 2;
@@ -64,4 +68,34 @@ char *ish_read_line(void) {
 
     line[length] = '\0'; // Last thing in a string is \0, it denots the end of a string in C.
     return line;
+}
+
+char **ish_split_line(char *line) {
+    size_t capacity = 16;
+    size_t length = 0;
+
+    char **tokens = malloc(capacity * sizeof(char*));
+    if (tokens == NULL) { 
+        return NULL;
+    }
+    char d[] = " ";
+    char *token = strtok(line, d);
+
+    do {
+        if (length + 1 >= capacity) {
+            capacity *= 2;
+            char **grown_tokens = realloc(tokens, capacity * sizeof(char*));
+            if (grown_tokens == NULL) {
+                free(tokens);
+                return NULL;
+            }
+            tokens = grown_tokens;
+        }
+        tokens[length] = token;
+        length++;
+        token = strtok(NULL, d);
+    } while (token != NULL);
+    tokens[length] = NULL;
+
+    return tokens;
 }
