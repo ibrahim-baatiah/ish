@@ -1,6 +1,6 @@
+#! /home/ibrahim/Developer/my-shell/ish
+# Another comment for testing
 pwd
 ls
-cd /tmp
-pwd
-date
+date	# One more down here to see.
 echo All is done!!!

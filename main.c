@@ -45,8 +45,7 @@ void ish_loop(FILE *stream, int interactive) {
             free(args);   
         }
         
-    } while (state != 0);
-    
+    } while (state != 0); 
 }
 
 char *ish_read_line(FILE *stream) {
@@ -62,6 +61,8 @@ char *ish_read_line(FILE *stream) {
     while ((ch = fgetc(stream)) != EOF && ch != '\n') // Use single quotes '\n' not "\n". Single quotes is one char (a number), double quotes is a string (a pointer to memory), so comparing ch with "\n" won't work.
     // // getchar() reads one char from the keyboard (stdin), not from a string. It waits until you press Enter, then gives the chars one by one.
     {
+        // Neglect comments starting with #
+        if (ch == '#') ch = '\0';
         if (length + 1 >= capacity) { // length + 1 because C marks where the string ends with "\0", so we need to keep a spot to add it ourselevs later.
             capacity *= 2;
             char *grown = realloc(line, capacity); // Why save it in grown? For the same reason above, if it returned null:
@@ -92,7 +93,7 @@ char **ish_split_line(char *line) {
     if (tokens == NULL) { 
         return NULL;
     }
-    char d[] = " ";
+    char d[] = " \t";
     char *token = strtok(line, d);
 
     do {
@@ -124,7 +125,7 @@ int ish_launch(char **args) {
         if (execvp(args[0], args) == -1) {
             perror("ish");
         }
-        exit(EXIT_FAILURE);
+        _exit(EXIT_FAILURE);
     } else { // This is the parent
         int status;
         do {
