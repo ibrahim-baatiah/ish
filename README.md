@@ -51,3 +51,8 @@ chmod +x myScript
 ## Why
 
 This project follows the classic ["Write a Shell in C"](https://brennan.io/2015/01/16/write-a-shell-in-c/) tutorial as a reference, implemented step-by-step to actually understand `fork`/`exec`, process control, and parsing — not just copy the tutorial's code.
+
+## References
+
+- *The C Programming Language* (K&R)
+- *Operating Systems: Three Easy Pieces* (OSTEP) — especially helpful for system calls and low-level understanding of processes, concurrency, and scheduling
