@@ -3,11 +3,16 @@
 #include <string.h>
 #include <unistd.h>
 #include <sys/wait.h>
+#include <errno.h>
 
 void ish_loop(void);
 char *ish_read_line(void);
 char **ish_split_line(char *line);
 int ish_launch(char **args);
+int ish_cd(char **args);
+int ish_exit(char **args);
+int ish_help(char **args);
+int ish_execute(char **args);
 
 int main(int argc, char **argv) {
 
@@ -25,9 +30,8 @@ void ish_loop(void) {
             state = 0;
         } else {
             char **args = ish_split_line(line);
-            // if (strcmp(args[0], "exit") == 0) exit(0);
             if (args[0] != NULL) {
-                ish_launch(args);
+                state = ish_execute(args);
             }
             free(line);
             free(args);   
@@ -119,5 +123,32 @@ int ish_launch(char **args) {
             waitpid(rc, &status, WUNTRACED);
         } while (!WIFEXITED(status) && !WIFSIGNALED(status));
     }
+    return 1;
+}
+
+int ish_cd(char **args) {
+    if (args[1] == NULL) fprintf(stderr, "No path was provided\n");
+    else {
+        if (chdir(args[1]) == -1) {
+        fprintf(stderr, "cd to %s failed: %s\n", args[1], strerror(errno));
+        }
+    }
+    return 1;
+}
+
+int ish_exit(char **args) {
+    return 0;
+}
+
+int ish_help(char **args) {
+    printf("This is my help page, I'll improve it later\n");
+    return 1;
+}
+
+int ish_execute(char **args) {
+    if (strcmp(args[0], "cd") == 0) return ish_cd(args);
+    else if (strcmp(args[0], "exit") == 0) return ish_exit(args);
+    else if (strcmp(args[0], "help") == 0) return ish_help(args);
+    else ish_launch(args);
     return 1;
 }
