@@ -1,10 +1,13 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <unistd.h>
+#include <sys/wait.h>
 
 void ish_loop(void);
 char *ish_read_line(void);
 char **ish_split_line(char *line);
+int ish_launch(char **args);
 
 int main(int argc, char **argv) {
 
@@ -22,10 +25,9 @@ void ish_loop(void) {
             state = 0;
         } else {
             char **args = ish_split_line(line);
-            printf("You entered: %s\n", line);
-            printf("Let's check each word: \n");
-            for (int i = 0; args[i] != NULL; i++) {
-                printf("Word %d: %s\n",i, args[i]);
+            // if (strcmp(args[0], "exit") == 0) exit(0);
+            if (args[0] != NULL) {
+                ish_launch(args);
             }
             free(line);
             free(args);   
@@ -98,4 +100,24 @@ char **ish_split_line(char *line) {
     tokens[length] = NULL;
 
     return tokens;
+}
+
+int ish_launch(char **args) {
+    pid_t rc = fork();
+
+    if (rc < 0) { // Fork Failed
+        fprintf(stderr, "Fork failed\n");
+        exit(1);
+    } else if (rc == 0) { // This is the child
+        if (execvp(args[0], args) == -1) {
+            perror("ish");
+        }
+        exit(EXIT_FAILURE);
+    } else { // This is the parent
+        int status;
+        do {
+            waitpid(rc, &status, WUNTRACED);
+        } while (!WIFEXITED(status) && !WIFSIGNALED(status));
+    }
+    return 1;
 }
