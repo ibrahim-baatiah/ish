@@ -21,5 +21,9 @@ int ish_is_assignment(char *token, char *eq);
 int ish_set_var(char *name, char *value);
 char *ish_expand_token(char *token);
 int ish_pipe_split(char **args);
+char *ish_get_var(const char *name);
+void ish_prompt_init(void);
+void ish_prompt_next_command(void);
+char *ish_render_prompt(void);
 
 #endif

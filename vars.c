@@ -14,13 +14,10 @@ void ish_vars_init(size_t capacity) {
 }
 
 int ish_grow_vars(size_t cap) {
-    capacity = cap * sizeof(Variable);
-    Variable *grown_vars = realloc(vars, capacity);
-    if (grown_vars == NULL) {
-        free(vars);
-        return -1;
-    }
+    Variable *grown_vars = realloc(vars, cap * sizeof(Variable));
+    if (grown_vars == NULL) return -1;
     vars = grown_vars;
+    capacity = cap;
     return 0;
 }
 
@@ -33,22 +30,22 @@ int ish_is_assignment(char *token, char *eq) {
 }
 
 int ish_set_var(char *name, char *value) {
+    if (vars == NULL) ish_vars_init(capacity);
     for  (int i = 0; i < length; i++) {
         if (strcmp(vars[i].name, name) == 0) {
             free(vars[i].value);
             vars[i].value = strdup(value);
             return 0;
-        } else {
-            if (length + 1 >= capacity) ish_grow_vars(capacity*2);
-        } 
+        }
     }
+    if (length >= capacity && ish_grow_vars(capacity * 2) == -1) return -1;
     vars[length].name = strdup(name);
     vars[length].value = strdup(value);
     length++;
     return 0;
 }
 
-char *ish_get_var(char *name) {
+char *ish_get_var(const char *name) {
     for (int i = 0; i < length; i++) {
         if (strcmp(vars[i].name, name) == 0) return vars[i].value;
     }

@@ -18,9 +18,14 @@ int main(int argc, char **argv) {
 
 void ish_loop(FILE *stream, int interactive) {
     int state = 1;
-    // char  *dir = getenv("PS1");
+    ish_prompt_init();
     do {
-        if (interactive) printf("$ ");
+        if (interactive) {
+            char *prompt = ish_render_prompt();
+            fputs(prompt, stdout);
+            fflush(stdout);
+            free(prompt);
+        }
         char *line = ish_read_line(stream);
         if (line == NULL) {
             state = 0;
@@ -31,6 +36,7 @@ void ish_loop(FILE *stream, int interactive) {
                 if ((state = ish_pipe_split(args)) == 0) {
                      state = ish_execute(args);
                 }
+                ish_prompt_next_command();
             }
             free(line);
             free(args);   
