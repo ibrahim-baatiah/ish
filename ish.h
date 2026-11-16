@@ -20,5 +20,6 @@ int handle_redirect(char **args);
 int ish_is_assignment(char *token, char *eq);
 int ish_set_var(char *name, char *value);
 char *ish_expand_token(char *token);
+int ish_pipe_split(char **args);
 
 #endif

@@ -18,15 +18,19 @@ int main(int argc, char **argv) {
 
 void ish_loop(FILE *stream, int interactive) {
     int state = 1;
+    // char  *dir = getenv("PS1");
     do {
-        if (interactive) printf("> ");
+        if (interactive) printf("$ ");
         char *line = ish_read_line(stream);
         if (line == NULL) {
             state = 0;
         } else {
             char **args = ish_split_line(line);
             if (args[0] != NULL) {
-                state = ish_execute(args);
+                // state = ish_execute(args);
+                if ((state = ish_pipe_split(args)) == 0) {
+                     state = ish_execute(args);
+                }
             }
             free(line);
             free(args);   
